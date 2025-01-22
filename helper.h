@@ -21,6 +21,9 @@ mmbuffer_t *create_mmbuffer(
 void destroy_mmbuffer(
   mmbuffer_t *mmbuffer
 );
+const char *get_mmbuffer_string(
+mmbuffer_t *mmbuffer
+);
 
 // xpparam_t functions
 xpparam_t *create_xpparam(

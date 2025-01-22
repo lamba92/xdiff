@@ -59,6 +59,11 @@ void destroy_mmbuffer(
     }
 }
 
+const char *get_mmbuffer_string(mmbuffer_t *mmbuffer) {
+    if (!mmbuffer || !mmbuffer->ptr) return NULL;
+    return mmbuffer->ptr;
+}
+
 // xpparam_t functions
 xpparam_t *create_xpparam(
   unsigned long flags,
