@@ -22,7 +22,7 @@ mmfile_t *create_mmfile(
     return mmfile;
 }
 
-void free_mmfile(
+void destroy_mmfile(
   mmfile_t *mmfile
 ) {
     if (mmfile) {
@@ -50,7 +50,7 @@ mmbuffer_t *create_mmbuffer(
     return mmbuffer;
 }
 
-void free_mmbuffer(
+void destroy_mmbuffer(
   mmbuffer_t *mmbuffer
 ) {
     if (mmbuffer) {
@@ -88,27 +88,14 @@ xpparam_t *create_xpparam(
     return xpparam;
 }
 
-void free_xpparam(
-  xpparam_t *xpparam
-) {
-    if (xpparam) {
-        for (size_t i = 0; i < xpparam->anchors_nr; i++) {
-            free(xpparam->anchors[i]);
-        }
-        free(xpparam->anchors);
-        free(xpparam->ignore_regex);
-        free(xpparam);
-    }
-}
-
-void destroy_recursively_xpparam(
+void destroy_xpparam(
   xpparam_t *xpparam
 ) {
     if (xpparam) {
         // Free each regex in the ignore_regex array
         if (xpparam->ignore_regex) {
             for (size_t i = 0; i < xpparam->ignore_regex_nr; i++) {
-                free_regex(xpparam->ignore_regex[i]);
+                destroy_regex(xpparam->ignore_regex[i]);
             }
             free(xpparam->ignore_regex);
         }
@@ -121,7 +108,6 @@ void destroy_recursively_xpparam(
             free(xpparam->anchors);
         }
 
-        // Finally, free the xpparam structure itself
         free(xpparam);
     }
 }
@@ -153,7 +139,7 @@ xdemitcb_t *create_xdemitcb(
     return xdemitcb;
 }
 
-void free_xdemitcb(
+void destroy_xdemitcb(
   xdemitcb_t *xdemitcb
 ) {
     if (xdemitcb) {
@@ -182,7 +168,7 @@ xdemitconf_t *create_xdemitconf(
     return xdemitconf;
 }
 
-void free_xdemitconf(
+void destroy_xdemitconf(
   xdemitconf_t *xdemitconf
 ) {
     if (xdemitconf) {
@@ -213,7 +199,7 @@ xmparam_t *create_xmparam(
     return xmparam;
 }
 
-void free_xmparam(
+void destroy_xmparam(
   xmparam_t *xmparam
 ) {
     if (xmparam) {
@@ -240,7 +226,7 @@ xdl_regex_t *create_regex(
     return (xdl_regex_t *)regex;
 }
 
-void free_regex(
+void destroy_regex(
   xdl_regex_t *regex
 ) {
     if (regex) {

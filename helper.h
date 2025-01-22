@@ -9,7 +9,7 @@ mmfile_t *create_mmfile(
   const char *data,
   long size
 );
-void free_mmfile(
+void destroy_mmfile(
   mmfile_t *mmfile
 );
 
@@ -18,7 +18,7 @@ mmbuffer_t *create_mmbuffer(
   const char *data,
   long size
 );
-void free_mmbuffer(
+void destroy_mmbuffer(
   mmbuffer_t *mmbuffer
 );
 
@@ -30,10 +30,7 @@ xpparam_t *create_xpparam(
   char **anchors,
   size_t anchors_count
 );
-void free_xpparam(
-  xpparam_t *xpparam
-);
-void destroy_recursively_xpparam(
+void destroy_xpparam(
   xpparam_t *xpparam
 );
 
@@ -55,7 +52,7 @@ xdemitcb_t *create_xdemitcb(
     int
   )
 );
-void free_xdemitcb(
+void destroy_xdemitcb(
   xdemitcb_t *xdemitcb
 );
 
@@ -68,7 +65,7 @@ xdemitconf_t *create_xdemitconf(
   void *find_function_private,
   xdl_emit_hunk_consume_func_t hunk_function
 );
-void free_xdemitconf(
+void destroy_xdemitconf(
   xdemitconf_t *xdemitconf
 );
 
@@ -82,7 +79,7 @@ xmparam_t *create_xmparam(
   const char *file1_label,
   const char *file2_label
 );
-void free_xmparam(
+void destroy_xmparam(
   xmparam_t *xmparam
 );
 
@@ -91,7 +88,7 @@ xdl_regex_t *create_regex(
   const char *pattern,
   int flags
 );
-void free_regex(
+void destroy_regex(
   xdl_regex_t *regex
 );
 
