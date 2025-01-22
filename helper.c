@@ -239,3 +239,136 @@ void destroy_regex(
         free(regex);
     }
 }
+
+// Getter functions for xdiff_change_t
+char xdiff_change_get_type(xdiff_change_t *change) {
+    return change->type;
+}
+
+const char *xdiff_change_get_line(xdiff_change_t *change) {
+    return change->line;
+}
+
+// Getter functions for xdiff_hunk_t
+long xdiff_hunk_get_old_begin(xdiff_hunk_t *hunk) {
+    return hunk->old_begin;
+}
+
+long xdiff_hunk_get_old_count(xdiff_hunk_t *hunk) {
+    return hunk->old_count;
+}
+
+long xdiff_hunk_get_new_begin(xdiff_hunk_t *hunk) {
+    return hunk->new_begin;
+}
+
+long xdiff_hunk_get_new_count(xdiff_hunk_t *hunk) {
+    return hunk->new_count;
+}
+
+xdiff_change_t *xdiff_hunk_get_changes(xdiff_hunk_t *hunk) {
+    return hunk->changes;
+}
+
+size_t xdiff_hunk_get_change_count(xdiff_hunk_t *hunk) {
+    return hunk->change_count;
+}
+
+// Getter functions for xdiff_result_t
+xdiff_hunk_t *xdiff_result_get_hunks(xdiff_result_t *result) {
+    return result->hunks;
+}
+
+size_t xdiff_result_get_hunk_count(xdiff_result_t *result) {
+    return result->hunk_count;
+}
+
+// Callback function to handle hunk information during the diff operation.
+static int hunk_callback(void *priv, long old_begin, long old_count, long new_begin, long new_count, const char *func, long funclen) {
+    xdiff_result_t *result = (xdiff_result_t *)priv; // Cast private data to xdiff_result_t
+
+    // Allocate memory for a new hunk in the result
+    result->hunks = realloc(result->hunks, (result->hunk_count + 1) * sizeof(xdiff_hunk_t));
+    if (!result->hunks) return -1; // Allocation error
+
+    // Initialize the new hunk
+    xdiff_hunk_t *hunk = &result->hunks[result->hunk_count++];
+    hunk->old_begin = old_begin;
+    hunk->old_count = old_count;
+    hunk->new_begin = new_begin;
+    hunk->new_count = new_count;
+    hunk->changes = NULL;
+    hunk->change_count = 0;
+
+    return 0;
+}
+
+// Callback function to handle line changes during the diff operation.
+static int line_callback(void *priv, mmbuffer_t *line, int type) {
+    xdiff_result_t *result = (xdiff_result_t *)priv; // Cast private data to xdiff_result_t
+
+    // Ensure there is at least one hunk to associate the line with
+    if (result->hunk_count == 0) return -1;
+
+    xdiff_hunk_t *hunk = &result->hunks[result->hunk_count - 1]; // Get the last hunk
+
+    // Allocate memory for a new change in the hunk
+    hunk->changes = realloc(hunk->changes, (hunk->change_count + 1) * sizeof(xdiff_change_t));
+    if (!hunk->changes) return -1; // Allocation error
+
+    // Initialize the new change
+    xdiff_change_t *change = &hunk->changes[hunk->change_count++];
+    change->type = (type == 0 ? ' ' : (type > 0 ? '+' : '-')); // Determine the type of change
+    change->line = strndup(line->ptr, line->size); // Copy the line content
+
+    return 0;
+}
+
+// Simplified wrapper for xdl_diff that returns a structured result instead of using callbacks.
+xdiff_result_t *xdl_xdiff_simple(mmfile_t *mf1, mmfile_t *mf2, xpparam_t *xpp, xdemitconf_t *xecfg) {
+    // Allocate memory for the result structure
+    xdiff_result_t *result = malloc(sizeof(xdiff_result_t));
+    if (!result) return NULL; // Allocation error
+
+    result->hunks = NULL;
+    result->hunk_count = 0;
+
+    // Define the callbacks for hunks and lines
+    xdemitcb_t ecb = {
+            .priv = result,
+            .out_hunk = hunk_callback,
+            .out_line = line_callback
+    };
+
+    // Perform the diff operation
+    if (xdl_diff(mf1, mf2, xpp, xecfg, &ecb) < 0) {
+        // Cleanup in case of error
+        for (size_t i = 0; i < result->hunk_count; i++) {
+            for (size_t j = 0; j < result->hunks[i].change_count; j++) {
+                free(result->hunks[i].changes[j].line); // Use destroy for each line
+            }
+            free(result->hunks[i].changes); // Use destroy for the changes array
+        }
+        free(result->hunks); // Use destroy for the hunks array
+        free(result); // Use destroy for the result structure
+        return NULL;
+    }
+
+    return result;
+}
+
+// Frees the memory allocated for the xdiff_result_t structure.
+void xdiff_result_destroy(xdiff_result_t *result) {
+    if (!result) return; // Nothing to free
+
+    // Free each hunk and its associated changes
+    for (size_t i = 0; i < result->hunk_count; i++) {
+        for (size_t j = 0; j < result->hunks[i].change_count; j++) {
+            free(result->hunks[i].changes[j].line); // Use destroy for the line content
+        }
+        free(result->hunks[i].changes); // Use destroy for the changes array
+    }
+
+    free(result->hunks); // Use destroy for the hunks array
+    free(result); // Use destroy for the result structure
+}
