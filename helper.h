@@ -33,6 +33,31 @@ xpparam_t *create_xpparam(
 void free_xpparam(
   xpparam_t *xpparam
 );
+void destroy_recursively_xpparam(
+  xpparam_t *xpparam
+);
+
+// xdemitcb_t functions
+xdemitcb_t *create_xdemitcb(
+  void *private_data,
+  int (*output_hunk_callback)(
+    void *,
+    long old_begin,
+    long old_count,
+    long new_begin,
+    long new_count,
+    const char *function_name,
+    long function_name_length
+  ),
+  int (*output_line_callback)(
+    void *,
+    mmbuffer_t *,
+    int
+  )
+);
+void free_xdemitcb(
+  xdemitcb_t *xdemitcb
+);
 
 // xdemitconf_t functions
 xdemitconf_t *create_xdemitconf(

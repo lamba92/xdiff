@@ -101,6 +101,66 @@ void free_xpparam(
     }
 }
 
+void destroy_recursively_xpparam(
+  xpparam_t *xpparam
+) {
+    if (xpparam) {
+        // Free each regex in the ignore_regex array
+        if (xpparam->ignore_regex) {
+            for (size_t i = 0; i < xpparam->ignore_regex_nr; i++) {
+                free_regex(xpparam->ignore_regex[i]);
+            }
+            free(xpparam->ignore_regex);
+        }
+
+        // Free each anchor string
+        if (xpparam->anchors) {
+            for (size_t i = 0; i < xpparam->anchors_nr; i++) {
+                free(xpparam->anchors[i]);
+            }
+            free(xpparam->anchors);
+        }
+
+        // Finally, free the xpparam structure itself
+        free(xpparam);
+    }
+}
+
+// xdemitcb_t functions
+xdemitcb_t *create_xdemitcb(
+  void *private_data,
+  int (*output_hunk_callback)(
+    void *,
+    long old_begin,
+    long old_count,
+    long new_begin,
+    long new_count,
+    const char *function_name,
+    long function_name_length
+  ),
+  int (*output_line_callback)(
+    void *,
+    mmbuffer_t *,
+    int
+  )
+) {
+    xdemitcb_t *xdemitcb = (xdemitcb_t *)malloc(sizeof(xdemitcb_t));
+    if (xdemitcb) {
+        xdemitcb->priv = private_data;
+        xdemitcb->out_hunk = output_hunk_callback;
+        xdemitcb->out_line = output_line_callback;
+    }
+    return xdemitcb;
+}
+
+void free_xdemitcb(
+  xdemitcb_t *xdemitcb
+) {
+    if (xdemitcb) {
+        free(xdemitcb);
+    }
+}
+
 // xdemitconf_t functions
 xdemitconf_t *create_xdemitconf(
   long context_length,
