@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
+#include <stdio.h> // For error messages
 
 // mmfile_t functions
 mmfile_t *create_mmfile(
@@ -240,47 +241,65 @@ void destroy_regex(
     }
 }
 
+// Helper function to handle null checks and throw an error
+static void handle_null_check(const char *message) {
+    fprintf(stderr, "Error: %s\n", message);
+    exit(EXIT_FAILURE);
+}
+
 // Getter functions for xdiff_change_t
 char xdiff_change_get_type(xdiff_change_t *change) {
+    if (!change) handle_null_check("xdiff_change_t is NULL");
     return change->type;
 }
 
 const char *xdiff_change_get_line(xdiff_change_t *change) {
+    if (!change) handle_null_check("xdiff_change_t is NULL");
     return change->line;
 }
 
 // Getter functions for xdiff_hunk_t
 long xdiff_hunk_get_old_begin(xdiff_hunk_t *hunk) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
     return hunk->old_begin;
 }
 
 long xdiff_hunk_get_old_count(xdiff_hunk_t *hunk) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
     return hunk->old_count;
 }
 
 long xdiff_hunk_get_new_begin(xdiff_hunk_t *hunk) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
     return hunk->new_begin;
 }
 
 long xdiff_hunk_get_new_count(xdiff_hunk_t *hunk) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
     return hunk->new_count;
 }
 
-xdiff_change_t *xdiff_hunk_get_changes(xdiff_hunk_t *hunk) {
-    return hunk->changes;
-}
-
 size_t xdiff_hunk_get_change_count(xdiff_hunk_t *hunk) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
     return hunk->change_count;
 }
 
-// Getter functions for xdiff_result_t
-xdiff_hunk_t *xdiff_result_get_hunks(xdiff_result_t *result) {
-    return result->hunks;
+xdiff_change_t *xdiff_hunk_get_change_at(xdiff_hunk_t *hunk, size_t index) {
+    if (!hunk) handle_null_check("xdiff_hunk_t is NULL");
+    if (index >= hunk->change_count) handle_null_check("Index out of bounds in xdiff_hunk_get_change_at");
+    return &hunk->changes[index];
 }
 
+// Getter functions for xdiff_result_t
 size_t xdiff_result_get_hunk_count(xdiff_result_t *result) {
+    if (!result) handle_null_check("xdiff_result_t is NULL");
     return result->hunk_count;
+}
+
+xdiff_hunk_t *xdiff_result_get_hunk_at(xdiff_result_t *result, size_t index) {
+    if (!result) handle_null_check("xdiff_result_t is NULL");
+    if (index >= result->hunk_count) handle_null_check("Index out of bounds in xdiff_result_get_hunk_at");
+    return &result->hunks[index];
 }
 
 // Callback function to handle hunk information during the diff operation.

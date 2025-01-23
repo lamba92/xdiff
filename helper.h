@@ -121,17 +121,21 @@ typedef struct xdiff_result {
 char xdiff_change_get_type(xdiff_change_t *change);
 const char *xdiff_change_get_line(xdiff_change_t *change);
 
+// Getter functions for xdiff_change_t
+char xdiff_change_get_type(xdiff_change_t *change);
+const char *xdiff_change_get_line(xdiff_change_t *change);
+
 // Getter functions for xdiff_hunk_t
 long xdiff_hunk_get_old_begin(xdiff_hunk_t *hunk);
 long xdiff_hunk_get_old_count(xdiff_hunk_t *hunk);
 long xdiff_hunk_get_new_begin(xdiff_hunk_t *hunk);
 long xdiff_hunk_get_new_count(xdiff_hunk_t *hunk);
-xdiff_change_t *xdiff_hunk_get_changes(xdiff_hunk_t *hunk);
 size_t xdiff_hunk_get_change_count(xdiff_hunk_t *hunk);
+xdiff_change_t *xdiff_hunk_get_change_at(xdiff_hunk_t *hunk, size_t index);
 
 // Getter functions for xdiff_result_t
-xdiff_hunk_t *xdiff_result_get_hunks(xdiff_result_t *result);
 size_t xdiff_result_get_hunk_count(xdiff_result_t *result);
+xdiff_hunk_t *xdiff_result_get_hunk_at(xdiff_result_t *result, size_t index);
 
 // Simplified wrapper for xdl_diff that returns a structured result
 xdiff_result_t *xdl_xdiff_simple(mmfile_t *mf1, mmfile_t *mf2, xpparam_t *xpp, xdemitconf_t *xecfg);
