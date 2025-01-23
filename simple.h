@@ -21,17 +21,34 @@ typedef struct xdiff_result {
 } xdiff_result_t;
 
 // Getter functions for xdiff_hunk_t
-size_t xdiff_hunk_get_line_count(xdiff_hunk_t *hunk);
-const char *xdiff_hunk_get_line_at(xdiff_hunk_t *hunk, size_t index);
+size_t xdiff_hunk_get_line_count(
+  xdiff_hunk_t *hunk
+);
+const char *xdiff_hunk_get_line_at(
+  xdiff_hunk_t *hunk,
+  size_t index
+);
 
 // Getter functions for xdiff_result_t
-size_t xdiff_result_get_hunk_count(xdiff_result_t *result);
-xdiff_hunk_t *xdiff_result_get_hunk_at(xdiff_result_t *result, size_t index);
+size_t xdiff_result_get_hunk_count(
+  xdiff_result_t *result
+);
+xdiff_hunk_t *xdiff_result_get_hunk_at(
+  xdiff_result_t *result,
+  size_t index
+);
 
 // Simplified wrapper for xdl_diff that returns a structured result
-xdiff_result_t *xdl_xdiff_simple(mmfile_t *mf1, mmfile_t *mf2, xpparam_t *xpp, xdemitconf_t *xecfg);
+xdiff_result_t *xdl_xdiff_simple(
+  mmfile_t *mf1,
+  mmfile_t *mf2,
+  xpparam_t *xpp,
+  xdemitconf_t *xecfg
+);
 
 // Frees the memory allocated for the xdiff_result_t structure
-void xdiff_result_destroy(xdiff_result_t *result);
+void xdiff_result_destroy(
+    xdiff_result_t *result
+);
 
 #endif // SIMPLE_H
