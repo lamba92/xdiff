@@ -54,47 +54,32 @@ void xdiff_result_destroy(
 // Accessor for old_begin
 long xdiff_hunk_get_old_begin(
   xdiff_hunk_t *hunk
-) {
-    return hunk ? hunk->old_begin : -1;
-}
+);
 
 // Accessor for old_count
 long xdiff_hunk_get_old_count(
   xdiff_hunk_t *hunk
-) {
-    return hunk ? hunk->old_count : -1;
-}
+);
 
 // Accessor for new_begin
 long xdiff_hunk_get_new_begin(
   xdiff_hunk_t *hunk
-) {
-    return hunk ? hunk->new_begin : -1;
-}
+);
 
 // Accessor for new_count
 long xdiff_hunk_get_new_count(
   xdiff_hunk_t *hunk
-) {
-    return hunk ? hunk->new_count : -1;
-}
+);
 
 // Accessor for line_count
 size_t xdiff_hunk_get_line_count(
   xdiff_hunk_t *hunk
-) {
-    return hunk ? hunk->line_count : 0;
-}
+);
 
 // Accessor for specific line
 const char *xdiff_hunk_get_line_at(
   xdiff_hunk_t *hunk,
   size_t index
-) {
-    if (hunk && index < hunk->line_count) {
-        return hunk->lines[index];
-    }
-    return NULL;
-}
+);
 
 #endif // SIMPLE_H
