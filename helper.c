@@ -412,3 +412,59 @@ void xdiff_result_destroy(xdiff_result_t *result) {
     free(result->hunks);
     free(result);
 }
+
+// Getter for xdiff_change_t type
+char xdiff_change_get_type(xdiff_change_t *change) {
+    return change ? change->type : '\0'; // Return '\0' if change is NULL
+}
+
+// Getter for xdiff_change_t line
+const char *xdiff_change_get_line(xdiff_change_t *change) {
+    return change ? change->line : NULL; // Return NULL if change is NULL
+}
+
+// Getter for hunk's old begin line number
+long xdiff_hunk_get_old_begin(xdiff_hunk_t *hunk) {
+    return hunk ? hunk->old_begin : -1; // Return -1 if hunk is NULL
+}
+
+// Getter for hunk's old count
+long xdiff_hunk_get_old_count(xdiff_hunk_t *hunk) {
+    return hunk ? hunk->old_count : -1; // Return -1 if hunk is NULL
+}
+
+// Getter for hunk's new begin line number
+long xdiff_hunk_get_new_begin(xdiff_hunk_t *hunk) {
+    return hunk ? hunk->new_begin : -1;
+}
+
+// Getter for hunk's new count
+long xdiff_hunk_get_new_count(xdiff_hunk_t *hunk) {
+    return hunk ? hunk->new_count : -1;
+}
+
+// Getter for hunk's change count
+size_t xdiff_hunk_get_change_count(xdiff_hunk_t *hunk) {
+    return hunk ? hunk->change_count : 0;
+}
+
+// Getter for a specific change in a hunk
+xdiff_change_t *xdiff_hunk_get_change_at(xdiff_hunk_t *hunk, size_t index) {
+    if (hunk && index < hunk->change_count) {
+        return &hunk->changes[index];
+    }
+    return NULL; // Return NULL if index is out of bounds
+}
+
+// Getter for result's hunk count
+size_t xdiff_result_get_hunk_count(xdiff_result_t *result) {
+    return result ? result->hunk_count : 0;
+}
+
+// Getter for a specific hunk in a result
+xdiff_hunk_t *xdiff_result_get_hunk_at(xdiff_result_t *result, size_t index) {
+    if (result && index < result->hunk_count) {
+        return &result->hunks[index];
+    }
+    return NULL; // Return NULL if index is out of bounds
+}

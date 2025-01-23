@@ -121,10 +121,6 @@ typedef struct xdiff_result {
 char xdiff_change_get_type(xdiff_change_t *change);
 const char *xdiff_change_get_line(xdiff_change_t *change);
 
-// Getter functions for xdiff_change_t
-char xdiff_change_get_type(xdiff_change_t *change);
-const char *xdiff_change_get_line(xdiff_change_t *change);
-
 // Getter functions for xdiff_hunk_t
 long xdiff_hunk_get_old_begin(xdiff_hunk_t *hunk);
 long xdiff_hunk_get_old_count(xdiff_hunk_t *hunk);
