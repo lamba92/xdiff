@@ -127,14 +127,13 @@ static int line_callback(
     return 0;
 }
 
-// Converts the linked list of hunks into an array
-static xdiff_hunk_t *finalize_hunks(
-  xdiff_result_internal_t *result
-) {
+// Converts the linked list of hunks into an array, properly copying the lines
+static xdiff_hunk_t *finalize_hunks(xdiff_result_internal_t *result) {
     if (!result || result->hunk_count == 0) {
         return NULL;
     }
 
+    // Allocate memory for the array of hunks
     xdiff_hunk_t *hunks = malloc(result->hunk_count * sizeof(xdiff_hunk_t));
     if (!hunks) {
         fprintf(stderr, "Error: Memory allocation failed in finalize_hunks\n");
@@ -148,12 +147,64 @@ static xdiff_hunk_t *finalize_hunks(
             free(hunks);
             return NULL;
         }
+
+        // Copy the hunk metadata (like old_begin, old_count, etc.)
         hunks[i] = current->hunk;
+        hunks[i].lines = NULL; // Initialize to NULL before copying lines
+
+        // Allocate memory for copying lines
+        if (current->hunk.line_count > 0) {
+            hunks[i].lines = malloc(current->hunk.line_count * sizeof(char *));
+            if (!hunks[i].lines) {
+                fprintf(stderr, "Error: Memory allocation failed for lines array in finalize_hunks\n");
+
+                // Free everything created so far
+                for (size_t j = 0; j < i; j++) {
+                    for (size_t k = 0; k < hunks[j].line_count; k++) {
+                        free(hunks[j].lines[k]);
+                    }
+                    free(hunks[j].lines);
+                }
+                free(hunks);
+                return NULL;
+            }
+
+            // Copy each line into newly allocated memory
+            for (size_t j = 0; j < current->hunk.line_count; j++) {
+                hunks[i].lines[j] = strdup(current->hunk.lines[j]);
+                if (!hunks[i].lines[j]) {
+                    fprintf(stderr, "Error: Memory allocation failed for line content in finalize_hunks\n");
+
+                    // Cleanup for current hunk's lines
+                    for (size_t k = 0; k < j; k++) {
+                        free(hunks[i].lines[k]);
+                    }
+                    free(hunks[i].lines);
+
+                    // Cleanup for previous hunks
+                    for (size_t k = 0; k < i; k++) {
+                        for (size_t l = 0; l < hunks[k].line_count; l++) {
+                            free(hunks[k].lines[l]);
+                        }
+                        free(hunks[k].lines);
+                    }
+
+                    free(hunks);
+                    return NULL;
+                }
+            }
+        }
+
+        // Update line_count
+        hunks[i].line_count = current->hunk.line_count;
+
+        // Move to the next node in the linked list
         current = current->next;
     }
 
     return hunks;
 }
+
 
 // Frees the linked list of hunks
 static void free_hunk_list(
@@ -264,10 +315,8 @@ const char *xdiff_hunk_get_line_at(
   xdiff_hunk_t *hunk,
   size_t index
 ) {
-    fprintf(stderr, "getting line %zu\n", index);
     if (hunk && index < hunk->line_count) {
         char* line = hunk->lines[index];
-        fprintf(stderr, "line: %s\n", line);
         return line;
     }
     return NULL;
