@@ -76,8 +76,20 @@ static int line_callback(
   mmbuffer_t *line,
   int type
 ) {
+    // Validate input parameters
+    if (!priv) {
+        fprintf(stderr, "Error: Invalid priv pointer in line_callback\n");
+        return -1;
+    }
+
+    if (!line || !line->ptr || line->size < 0) {
+        fprintf(stderr, "Error: Invalid line data (null or bad size) in line_callback\n");
+        return -1;
+    }
+
     xdiff_result_internal_t *result = (xdiff_result_internal_t *)priv;
 
+    // Check if there is a hunk available to associate the line
     if (!result->tail) {
         fprintf(stderr, "Error: No hunk exists to associate the line\n");
         return -1;
@@ -85,21 +97,30 @@ static int line_callback(
 
     xdiff_hunk_t *current_hunk = &result->tail->hunk;
 
+    // Allocate memory for line content + null terminator
     char *line_content = malloc(line->size + 1);
     if (!line_content) {
-        fprintf(stderr, "Error: Memory allocation failed in line_callback\n");
+        fprintf(stderr, "Error: Memory allocation failed for line content in line_callback\n");
         return -1;
     }
+
+    // Copy line content and add null terminator
     memcpy(line_content, line->ptr, line->size);
     line_content[line->size] = '\0';
 
-    char **new_lines = realloc(current_hunk->lines, (current_hunk->line_count + 1) * sizeof(char*));
+    // Optimize reallocation for the hunk's lines array using a growth factor
+    size_t new_capacity = current_hunk->line_count == 0 ? 1 : current_hunk->line_count * 2;
+    if (current_hunk->line_count + 1 > new_capacity) {
+        new_capacity = current_hunk->line_count + 1;
+    }
+    char **new_lines = realloc(current_hunk->lines, new_capacity * sizeof(char *));
     if (!new_lines) {
-        fprintf(stderr, "Error: Memory allocation failed in line_callback\n");
-        free(line_content);
+        fprintf(stderr, "Error: Memory reallocation failed for lines array in line_callback\n");
+        free(line_content); // Clean up already allocated content
         return -1;
     }
 
+    // Update hunk's lines array
     current_hunk->lines = new_lines;
     current_hunk->lines[current_hunk->line_count++] = line_content;
 
@@ -243,8 +264,11 @@ const char *xdiff_hunk_get_line_at(
   xdiff_hunk_t *hunk,
   size_t index
 ) {
+    fprintf(stderr, "getting line %zu\n", index);
     if (hunk && index < hunk->line_count) {
-        return hunk->lines[index];
+        char* line = hunk->lines[index];
+        fprintf(stderr, "line: %s\n", line);
+        return line;
     }
     return NULL;
 }
