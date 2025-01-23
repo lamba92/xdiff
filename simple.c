@@ -248,3 +248,20 @@ const char *xdiff_hunk_get_line_at(
     }
     return NULL;
 }
+
+// Getter functions for xdiff_result_t
+size_t xdiff_result_get_hunk_count(
+  xdiff_result_t *result
+) {
+    return result ? result->hunk_count : 0;
+}
+
+xdiff_hunk_t *xdiff_result_get_hunk_at(
+  xdiff_result_t *result,
+  size_t index
+) {
+    if (result && index < result->hunk_count) {
+        return &result->hunks[index];
+    }
+    return NULL;
+}
