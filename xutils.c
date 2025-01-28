@@ -62,7 +62,7 @@ int xdl_emit_diffrec(char const *rec, long size, char const *pre, long psize,
 		i = 2;
 	}
 
-	result = ecb->outf(mb, i, ecb->priv);
+	result = ecb->out_line(ecb->priv, mb, i);
 	free(combined);
 	return result;
 }
