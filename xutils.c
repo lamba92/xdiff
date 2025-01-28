@@ -38,26 +38,33 @@ long xdl_bogosqrt(long n) {
 
 int xdl_emit_diffrec(char const *rec, long size, char const *pre, long psize,
 		     xdemitcb_t *ecb) {
-	int i = 2;
+	int i = 1;
 	mmbuffer_t mb[3];
+	char *combined;
+	long combined_size;
+	int result;
 
-	/* Keep pre and rec separate to avoid line duplication */
-	mb[0].ptr = (char *) pre;
-	mb[0].size = psize;
-	mb[1].ptr = (char *) rec;
-	mb[1].size = size;
+	/* Combine prefix and record content */
+	combined_size = psize + size;
+	combined = (char *)malloc(combined_size);
+	if (!combined)
+		return -1;
+
+	memcpy(combined, pre, psize);
+	memcpy(combined + psize, rec, size);
+
+	mb[0].ptr = combined;
+	mb[0].size = combined_size;
 
 	if (size > 0 && rec[size - 1] != '\n') {
-		mb[2].ptr = (char *) "\n\\ No newline at end of file\n";
-		mb[2].size = strlen(mb[2].ptr);
-		i++;
+		mb[1].ptr = (char *) "\n\\ No newline at end of file\n";
+		mb[1].size = strlen(mb[1].ptr);
+		i = 2;
 	}
 
-	if (ecb->out_line(ecb->priv, mb, i) < 0) {
-		return -1;
-	}
-
-	return 0;
+	result = ecb->outf(mb, i, ecb->priv);
+	free(combined);
+	return result;
 }
 
 void *xdl_mmfile_first(mmfile_t *mmf, long *size)
